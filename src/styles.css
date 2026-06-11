@@ -1,0 +1,762 @@
+:root {
+  --bg: #0f172a;
+  --bg-panel: #1e293b;
+  --bg-panel-2: #243349;
+  --border: #334155;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --accent: #38bdf8;
+  --good: #34d399;
+  --good-bg: rgba(52, 211, 153, 0.12);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.13);
+  --bad: #f87171;
+  --bad-bg: rgba(248, 113, 113, 0.14);
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  /* Guarantee no left/right scrollbar as the viewport shrinks. The ladder table
+     scrolls within its own wrapper, so nothing important is clipped. */
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  width: 100%;
+}
+
+/* ---- Header ---- */
+.app__header {
+  margin-bottom: 18px;
+}
+.app__title {
+  margin: 0;
+  font-size: 1.9rem;
+  letter-spacing: -0.02em;
+}
+.app__subtitle {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+}
+
+/* ---- How-it-works expander ---- */
+.how {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 16px;
+  margin-bottom: 22px;
+}
+.how > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 8px 0;
+  color: var(--accent);
+}
+.how__body {
+  padding-bottom: 8px;
+}
+.how__body p {
+  margin: 8px 0;
+  color: var(--text-dim);
+}
+.how__body strong {
+  color: var(--text);
+}
+.how__i {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #04293a;
+  font-size: 11px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* ---- Layout ---- */
+.app__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  /* Allow panels to shrink below their content (e.g. the wide ladder table),
+     so the table scrolls inside its own wrapper instead of widening the page. */
+  min-width: 0;
+}
+.panel__title {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.panel__header .panel__title {
+  margin-bottom: 0;
+}
+
+/* ---- Fields ---- */
+.inputs-grid {
+  display: grid;
+  /* min(160px, 100%) keeps a single column from ever exceeding the viewport. */
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+  gap: 14px;
+}
+.field__label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.field__control {
+  display: flex;
+  align-items: center;
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.field__control:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+.field__affix {
+  padding: 0 4px 0 10px;
+  color: var(--text-dim);
+}
+.field__affix--suffix {
+  padding: 0 10px 0 4px;
+}
+.field__input {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  padding: 9px 10px;
+  font-size: 1rem;
+  outline: none;
+}
+.field__hint {
+  margin: 5px 0 0;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+}
+
+/* ---- Stats ---- */
+.summary-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.stat-group {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.stat-group__title {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+  gap: 12px;
+}
+.stat {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.stat__label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+.stat__value {
+  font-size: 1.15rem;
+  font-weight: 650;
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.stat--big .stat__value {
+  font-size: 1.5rem;
+}
+.stat--good {
+  border-left-color: var(--good);
+}
+.stat--good .stat__value {
+  color: var(--good);
+}
+.stat--warn {
+  border-left-color: var(--warn);
+}
+.stat--warn .stat__value {
+  color: var(--warn);
+}
+.stat--bad {
+  border-left-color: var(--bad);
+}
+.stat--bad .stat__value {
+  color: var(--bad);
+}
+
+/* ---- Buttons ---- */
+.btn {
+  background: var(--bg-panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 13px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.btn:hover {
+  border-color: var(--accent);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--text-dim);
+}
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.icon-btn:hover {
+  color: var(--bad);
+  background: var(--bad-bg);
+}
+.link-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: 0 0 1px;
+}
+
+/* ---- Ladder table ---- */
+.ladder__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 14px;
+}
+.ladder {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  min-width: 760px;
+}
+.ladder th,
+.ladder td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ladder th {
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.76rem;
+  vertical-align: bottom;
+}
+.ladder td.num,
+.ladder th.num {
+  text-align: right;
+}
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ladder__empty {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 24px;
+}
+.row--bad {
+  background: var(--bad-bg);
+}
+.row--warn {
+  background: var(--warn-bg);
+}
+.cell-input {
+  display: flex;
+  align-items: center;
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 120px;
+}
+.cell-input:focus-within {
+  border-color: var(--accent);
+}
+.cell-input__affix {
+  padding-left: 8px;
+  color: var(--text-dim);
+}
+.cell-input input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge--bad {
+  background: var(--bad);
+  color: #2b0808;
+}
+.ladder__note {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+.swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+.swatch--bad {
+  background: var(--bad);
+}
+.swatch--warn {
+  background: var(--warn);
+}
+
+/* ---- Alerts ---- */
+.alert {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+.alert--bad {
+  background: var(--bad-bg);
+  border: 1px solid var(--bad);
+  color: var(--bad);
+}
+.alert--warn {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  margin: 0 0 18px;
+}
+.alert code {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* ---- Ticker + live price ---- */
+.ticker {
+  width: 100%;
+}
+.ticker__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ticker__input {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 9px 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  width: 140px;
+  max-width: 100%;
+  outline: none;
+}
+.ticker__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.price-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 0 3px var(--good-bg);
+}
+.price-badge--live {
+  border-color: var(--good);
+  color: var(--text);
+}
+.price-badge--pending {
+  color: var(--text-dim);
+}
+.price-badge--error {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+.price-badge--manual {
+  color: var(--text-dim);
+}
+.field__hint--warn {
+  color: var(--warn);
+}
+
+/* ---- Mini (per-stock) margin distance bar ---- */
+.minigauge {
+  margin: 4px 0 10px;
+}
+.minigauge__head {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+.minigauge__track {
+  position: relative;
+  height: 22px;
+  background: var(--good-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  /* visible so inline price labels can sit at the very edges without clipping */
+  overflow: visible;
+}
+.minigauge__danger {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--bad-bg);
+  border-right: 2px solid var(--bad);
+  border-radius: 999px 0 0 999px;
+}
+.minigauge__marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--accent);
+  transform: translateX(-1px);
+}
+.minigauge__price {
+  position: absolute;
+  top: 50%;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* Call price (yellow) sits just LEFT of the call line, inside the danger zone. */
+.minigauge__price--call {
+  color: var(--warn);
+  transform: translate(-100%, -50%);
+  padding-right: 5px;
+}
+/* Flip to the right of the line when the call line is near the left edge. */
+.minigauge__price--call.minigauge__price--flip {
+  transform: translate(0, -50%);
+  padding-right: 0;
+  padding-left: 5px;
+}
+/* Current price (blue) sits just RIGHT of the marker line. */
+.minigauge__price--now {
+  color: var(--accent);
+  transform: translate(0, -50%);
+  padding-left: 5px;
+}
+.minigauge--called .minigauge__marker {
+  background: var(--bad);
+}
+.minigauge__note {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  margin: 0 0 10px;
+}
+
+/* ---- Refresh status ---- */
+.refresh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.refresh__text {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* ---- Account controls / positions ---- */
+.account-controls {
+  margin-bottom: 16px;
+  max-width: 280px;
+}
+.position__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.position__top .ticker {
+  flex: 1 1 220px;
+}
+.position__stats {
+  margin-top: 16px;
+}
+.position {
+  border-left: 3px solid var(--accent);
+}
+.add-stock {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0;
+}
+.btn--accent {
+  background: var(--accent);
+  color: #04293a;
+  border-color: var(--accent);
+  font-weight: 600;
+  padding: 10px 18px;
+}
+.btn--accent:hover {
+  filter: brightness(1.05);
+}
+
+/* ---- Gauge ---- */
+.gauge {
+  margin-top: 4px;
+}
+.gauge__track {
+  position: relative;
+  height: 26px;
+  background: var(--good-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  margin: 30px 0 8px;
+}
+.gauge__danger {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: var(--bad-bg);
+  border-right: 2px solid var(--bad);
+  border-radius: 999px 0 0 999px;
+}
+.gauge__marker {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  transform: translateX(-1px);
+}
+.gauge__marker--now {
+  background: var(--accent);
+}
+.gauge__marker--call {
+  background: var(--bad);
+}
+.gauge__flag {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.gauge__flag--now {
+  background: var(--accent);
+  color: #04293a;
+}
+.gauge__flag--call {
+  background: var(--bad);
+  color: #2b0808;
+  top: auto;
+  bottom: -26px;
+}
+.gauge__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+.gauge__readout {
+  margin: 14px 0 0;
+  font-size: 0.92rem;
+}
+.text-good {
+  color: var(--good);
+}
+.text-bad {
+  color: var(--bad);
+}
+
+/* ---- Info tooltip ---- */
+.info {
+  position: relative;
+  display: inline-flex;
+}
+.info__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  color: var(--text);
+  font-size: 10px;
+  font-style: italic;
+  font-weight: 700;
+  cursor: help;
+  padding: 0;
+}
+.info__icon:hover,
+.info__icon:focus-visible {
+  background: var(--accent);
+  color: #04293a;
+  outline: none;
+}
+.info__bubble {
+  position: fixed;
+  transform: translateX(-50%);
+  width: 240px;
+  max-width: calc(100vw - 24px);
+  background: #0b1220;
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.45;
+  z-index: 20;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- Footer ---- */
+.app__footer {
+  margin-top: 28px;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 720px) {
+  .summary-groups {
+    grid-template-columns: 1fr;
+  }
+  .app {
+    padding: 20px 14px 48px;
+  }
+  .panel {
+    padding: 14px;
+  }
+  .app__title {
+    font-size: 1.5rem;
+  }
+  .panel__header {
+    align-items: flex-start;
+  }
+  .account-controls {
+    max-width: 100%;
+  }
+  .info__bubble {
+    width: 220px;
+  }
+}
+
+@media (max-width: 420px) {
+  /* Stack inputs and stats one-per-row on small phones. */
+  .inputs-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
