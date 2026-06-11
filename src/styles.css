@@ -335,10 +335,10 @@ textarea,
 }
 .ladder td.num,
 .ladder th.num {
-  text-align: right;
+  text-align: left;
 }
 .num {
-  text-align: right;
+  text-align: left;
   font-variant-numeric: tabular-nums;
 }
 .ladder__empty {
