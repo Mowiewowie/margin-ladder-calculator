@@ -359,11 +359,15 @@ textarea,
   border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
-  max-width: 120px;
+  /* DEFINITE width (not just max-width): with overflow:hidden these flex cells
+     would otherwise collapse to ~0 in the auto-layout table and the long
+     numeric columns would steal all the room. A fixed width reserves space and
+     lets the table scroll horizontally instead. */
+  width: 70px;
 }
-/* Buy Price: wide enough to comfortably show "$123.45" (5 digits + decimal). */
+/* Buy Price: a little wider to comfortably show "$123.45" (5 digits + decimal). */
 .cell-input--price {
-  max-width: 150px;
+  width: 80px;
 }
 .cell-input:focus-within {
   border-color: var(--accent);
