@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { computeAccount } from './account.js'
 import { usePrices } from './usePrices.js'
 import { toNumber } from './margin.js'
+import { incrementRungPrices, nextRungPrice } from './ladder.js'
 import {
   DEFAULT_ACCOUNT,
   DEFAULT_LADDER_STEP_PCT,
@@ -9,9 +10,6 @@ import {
   makePosition,
   makeRung,
 } from './constants.js'
-
-/** Round a price to cents. */
-const round2 = (n) => Math.round(n * 100) / 100
 
 /**
  * Single state + recompute hook for the whole multi-stock account.
@@ -85,11 +83,8 @@ export function useAccountModel() {
   const addRung = (positionId) =>
     mutateRungs(positionId, (rungs, pos) => {
       const ref = priceOf(model, positionId) || toNumber(pos.manualPrice)
-      const basis = rungs.length
-        ? Math.min(...rungs.map((r) => toNumber(r.price)))
-        : ref
-      const step = ref * DEFAULT_LADDER_STEP_PCT // 5% of the current price
-      const price = Math.max(0, round2(basis - step))
+      const basis = rungs.length ? Math.min(...rungs.map((r) => toNumber(r.price))) : ref
+      const price = nextRungPrice(basis, ref, DEFAULT_LADDER_STEP_PCT) // 5% of price
       const lastShares = rungs.length ? rungs[rungs.length - 1].shares : 100
       return [...rungs, makeRung({ price, shares: lastShares })]
     })
@@ -102,14 +97,9 @@ export function useAccountModel() {
   const fillIncrements = (positionId, { stepPct = DEFAULT_LADDER_STEP_PCT, count = 5, sharesPer = 200 } = {}) =>
     mutateRungs(positionId, (_rungs, pos) => {
       const top = priceOf(model, positionId) || toNumber(pos.manualPrice)
-      const step = top * stepPct // each rung is `stepPct` of the current price lower
-      const generated = []
-      for (let i = 1; i <= count; i++) {
-        const price = round2(top - step * i)
-        if (price <= 0) break
-        generated.push(makeRung({ price, shares: sharesPer }))
-      }
-      return generated
+      return incrementRungPrices(top, { stepPct, count }).map((price) =>
+        makeRung({ price, shares: sharesPer })
+      )
     })
 
   return {

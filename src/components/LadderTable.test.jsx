@@ -21,13 +21,14 @@ function Harness({ initialRungs }) {
   })
   const update = (id, key, value) =>
     setRungs((rs) => rs.map((r) => (r.id === id ? { ...r, [key]: value } : r)))
+  const remove = (id) => setRungs((rs) => rs.filter((r) => r.id !== id))
   return (
     <LadderTable
       rungs={rungs}
       rows={rows}
       onUpdateRung={update}
       onAddRung={() => {}}
-      onRemoveRung={() => {}}
+      onRemoveRung={remove}
       onFillIncrements={() => {}}
       onClear={() => {}}
     />
@@ -61,6 +62,25 @@ describe('LadderTable inputs — leading-zero / empty-field bug', () => {
     expect(sharesInput().value).toBe('')
     // The cumulative-shares column still computes (blank -> 0 -> just the 1000 owned).
     expect(screen.getByText('1,000')).toBeInTheDocument()
+  })
+
+  it('the × button removes that rung (and is the row’s first cell)', () => {
+    render(
+      <Harness
+        initialRungs={[
+          { id: 'r1', price: 90, shares: 500 },
+          { id: 'r2', price: 80, shares: 500 },
+        ]}
+      />
+    )
+    expect(screen.getAllByLabelText('Buy price')).toHaveLength(2)
+
+    // The remove button is the first cell of each row.
+    const firstRow = screen.getAllByRole('row')[1] // [0] is the header row
+    expect(firstRow.firstChild).toHaveClass('ladder__remove-col')
+
+    fireEvent.click(screen.getAllByLabelText('Remove rung')[0])
+    expect(screen.getAllByLabelText('Buy price')).toHaveLength(1)
   })
 
   it('the price field behaves the same way (strips leading zero)', () => {

@@ -56,6 +56,7 @@ export default function LadderTable({
         <table className="ladder">
           <thead>
             <tr>
+              <th className="ladder__remove-col" aria-label="Remove" />
               <th>
                 Buy Price
               </th>
@@ -83,14 +84,13 @@ export default function LadderTable({
                 Cushion
                 <InfoTooltip term="cushionToCall" label="cushion to call" />
               </th>
-              <th aria-label="Remove" />
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
               <tr>
                 <td colSpan={9} className="ladder__empty">
-                  No rungs yet. Add a rung or use “Fill $10 steps” to simulate
+                  No rungs yet. Add a rung or use “Fill 5% steps” to simulate
                   buying the dip.
                 </td>
               </tr>
@@ -107,8 +107,18 @@ export default function LadderTable({
               const raw = rawById.get(row.id) ?? {}
               return (
                 <tr key={row.id} className={tone}>
+                  <td className="ladder__remove-col">
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      aria-label="Remove rung"
+                      onClick={() => onRemoveRung(row.id)}
+                    >
+                      ×
+                    </button>
+                  </td>
                   <td>
-                    <div className="cell-input">
+                    <div className="cell-input cell-input--price">
                       <span className="cell-input__affix">$</span>
                       <input
                         type="text"
@@ -158,16 +168,6 @@ export default function LadderTable({
                     ) : (
                       formatPercent(row.cushionPct)
                     )}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="icon-btn"
-                      aria-label="Remove rung"
-                      onClick={() => onRemoveRung(row.id)}
-                    >
-                      ×
-                    </button>
                   </td>
                 </tr>
               )

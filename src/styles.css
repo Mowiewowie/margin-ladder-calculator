@@ -34,6 +34,19 @@ body {
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
+  /* Prevent the iOS "drag-scroll starts selecting the whole page" glitch:
+     disable text selection on the chrome, re-enable it on real inputs below. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Editable fields stay fully selectable/editable. */
+input,
+textarea,
+[contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .app {
@@ -264,13 +277,16 @@ body {
   color: var(--text-dim);
 }
 .icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
   background: transparent;
   border: none;
   color: var(--text-dim);
   font-size: 1.2rem;
   line-height: 1;
   cursor: pointer;
-  padding: 2px 6px;
   border-radius: 6px;
 }
 .icon-btn:hover {
@@ -345,8 +361,19 @@ body {
   overflow: hidden;
   max-width: 120px;
 }
+/* Buy Price: wide enough to comfortably show "$123.45" (5 digits + decimal). */
+.cell-input--price {
+  max-width: 150px;
+}
 .cell-input:focus-within {
   border-color: var(--accent);
+}
+/* Remove (×) column: now first, kept narrow with a small gap from the Buy Price
+   field so it isn't fat-fingered while editing the price. */
+.ladder__remove-col {
+  width: 1%;
+  padding-right: 6px !important;
+  text-align: center;
 }
 .cell-input__affix {
   padding-left: 8px;
