@@ -17,11 +17,17 @@ const HEALTHY = {
 }
 
 describe('AccountSummary', () => {
-  it('renders the value/loan, margin-call risk and performance groups', () => {
+  it('renders the value/loan, margin-call risk and performance sections', () => {
     render(<AccountSummary summary={summaryFor(HEALTHY)} loan={0} onLoanChange={() => {}} prices={PRICES} />)
-    expect(screen.getByText(/Account — Value & Loan/i)).toBeInTheDocument()
-    expect(screen.getByText(/Account — Margin-Call Risk/i)).toBeInTheDocument()
+    expect(screen.getByText(/Value & Loan/i)).toBeInTheDocument()
+    expect(screen.getByText(/Margin-Call Risk/i)).toBeInTheDocument()
     expect(screen.getByText(/Performance/i)).toBeInTheDocument()
+  })
+
+  it('shows the account-wide ladder indicator (All clear when no ladders trip)', () => {
+    render(<AccountSummary summary={summaryFor(HEALTHY)} loan={0} onLoanChange={() => {}} prices={PRICES} />)
+    expect(screen.getByText(/Any Ladder Call\?/i)).toBeInTheDocument()
+    expect(screen.getByText(/All clear/i)).toBeInTheDocument()
   })
 
   it('warns when the account is in a margin call', () => {

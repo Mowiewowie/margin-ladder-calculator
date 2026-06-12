@@ -176,12 +176,15 @@ export default function LadderTable({
         </table>
       </div>
       <p className="ladder__note">
-        Each row buys this stock on margin at that price, with your{' '}
-        <strong>other stocks held at their current price</strong>. Equity %, the
-        call price and the cushion are judged on your <strong>whole account</strong>
-        {' '}(one shared loan). Rows turn <span className="swatch swatch--bad" />{' '}
-        red when the account would be margin-called and{' '}
-        <span className="swatch swatch--warn" /> amber when the cushion is thin.
+        Each row is a <strong>dip price below today</strong>: it values your whole
+        holding of this stock at that price (your existing shares drop too), with
+        your <strong>other stocks held at their current price</strong>. Equity %,
+        the call price and the cushion are judged on your{' '}
+        <strong>whole account</strong> (one shared loan), and the cushion is
+        measured from that row’s dip price. Rows turn{' '}
+        <span className="swatch swatch--bad" /> red when the account would be
+        margin-called and <span className="swatch swatch--warn" /> amber when the
+        cushion is thin.
       </p>
     </section>
   )

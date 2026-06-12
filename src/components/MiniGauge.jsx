@@ -39,7 +39,7 @@ export default function MiniGauge({ price, callPrice, called }) {
             <span className="text-bad">margin call</span>
           ) : (
             <>
-              <span className="text-good">{formatPercent(cushion)}</span> cushion
+              <span className="text-good">{formatPercent(cushion)}</span> cushion from today’s price
             </>
           )}
         </span>

@@ -25,6 +25,7 @@ export default function MarginGauge({ summary }) {
   return (
     <section className="panel gauge-panel">
       <h2 className="panel__title">Account Risk — equity vs. maintenance</h2>
+      <p className="gauge__sub">Where your whole account stands at today’s prices.</p>
 
       <div
         className="gauge"

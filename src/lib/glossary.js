@@ -22,6 +22,8 @@ export const GLOSSARY = {
     'Because all stocks share one account, a strong position can support a weak one. The margin call is judged on the whole account, not stock by stock.',
   symbolCallPrice:
     'The price THIS stock can fall to (with your other stocks held steady) before the whole account hits a margin call. The more you borrow, the higher it climbs.',
+  ladderAlert:
+    'A quick scan of every stock’s buy ladder. Red = at least one rung would trigger an account margin call; amber = at least one cushion is thin; green = all ladders are clear. If it isn’t green, open the flagged stock’s ladder and check it against that stock’s EPR.',
   sharesOwned:
     'The number of shares you already hold in this stock before adding any new "ladder" buys.',
   avgCost:

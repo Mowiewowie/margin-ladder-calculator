@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchQuotes } from './priceService.js'
+import { isMarketOpen as defaultIsMarketOpen } from './marketHours.js'
 import { PRICE_DEBOUNCE_MS, PRICE_REFRESH_MS } from './constants.js'
 
 /**
@@ -9,8 +10,11 @@ import { PRICE_DEBOUNCE_MS, PRICE_REFRESH_MS } from './constants.js'
  * fetch for "A", "AA", "AAP", "AAPL" — only the settled value is fetched. A
  * ticker present at mount fetches immediately (no debounce on first load).
  *
- * Returns { quotes, lastUpdated, loading, refresh } where `quotes` is a map
- * keyed by upper-cased ticker (see fetchQuotes).
+ * Interval polling only runs during market hours. After hours the price is
+ * fetched once on initial load / when a ticker is added, then left alone.
+ * Manual refresh() always fetches regardless of hours.
+ *
+ * Returns { quotes, lastUpdated, loading, refresh, marketOpen }.
  */
 export function usePrices(tickers, options = {}) {
   const {
@@ -18,6 +22,7 @@ export function usePrices(tickers, options = {}) {
     intervalMs = PRICE_REFRESH_MS,
     debounceMs = PRICE_DEBOUNCE_MS,
     enabled = true,
+    isMarketOpen = defaultIsMarketOpen,
   } = options
 
   const [quotes, setQuotes] = useState({})
@@ -32,6 +37,11 @@ export function usePrices(tickers, options = {}) {
   // Always-current key so manual refresh uses the latest tickers immediately.
   const keyRef = useRef(tickerKey)
   keyRef.current = tickerKey
+
+  // Keep the market-hours check in a ref so changing its identity doesn't
+  // re-run the polling effect.
+  const isOpenRef = useRef(isMarketOpen)
+  isOpenRef.current = isMarketOpen
 
   // Debounced key drives auto-fetch/polling: it catches up to `tickerKey` only
   // after the user stops changing it for `debounceMs`.
@@ -56,10 +66,12 @@ export function usePrices(tickers, options = {}) {
 
   useEffect(() => {
     if (!enabled || !debouncedKey) return undefined
-    refresh() // fetch once the ticker set has settled
-    const id = setInterval(refresh, intervalMs)
+    refresh() // initial fetch (also covers a newly added ticker)
+    const id = setInterval(() => {
+      if (isOpenRef.current()) refresh() // only auto-poll during market hours
+    }, intervalMs)
     return () => clearInterval(id)
   }, [refresh, enabled, debouncedKey, intervalMs])
 
-  return { quotes, lastUpdated, loading, refresh }
+  return { quotes, lastUpdated, loading, refresh, marketOpen: isMarketOpen() }
 }

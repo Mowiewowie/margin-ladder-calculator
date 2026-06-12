@@ -271,3 +271,34 @@ describe('computeAccount', () => {
     expect(() => computeAccount(blank)).not.toThrow()
   })
 })
+
+describe('computeAccount — account-wide ladder alert', () => {
+  const withRung = (rung) => ({
+    loan: 0,
+    positions: [{ id: 'p', ticker: '', shares: 1000, avgCost: 100, eprPct: 30, price: 100, rungs: [rung] }],
+  })
+
+  it("is 'clear' when every rung is comfortably safe", () => {
+    expect(computeAccount(withRung({ id: 'a', price: 90, shares: 500 })).summary.ladderAlert).toBe('clear')
+  })
+
+  it("is 'call' when any rung would trigger a margin call", () => {
+    expect(computeAccount(withRung({ id: 'a', price: 50, shares: 5000 })).summary.ladderAlert).toBe('call')
+  })
+
+  it("is 'thin' when a rung's cushion is thin but not called", () => {
+    // 3000 sh, $160k loan at $80 -> call $76.19 -> ~4.8% cushion (< 10%), not called.
+    expect(computeAccount(withRung({ id: 'a', price: 80, shares: 2000 })).summary.ladderAlert).toBe('thin')
+  })
+
+  it("'call' takes precedence over 'thin' across stocks", () => {
+    const account = {
+      loan: 0,
+      positions: [
+        { id: 'thin', shares: 1000, avgCost: 100, eprPct: 30, price: 100, rungs: [{ id: 't', price: 80, shares: 2000 }] },
+        { id: 'call', shares: 1000, avgCost: 100, eprPct: 30, price: 100, rungs: [{ id: 'c', price: 50, shares: 5000 }] },
+      ],
+    }
+    expect(computeAccount(account).summary.ladderAlert).toBe('call')
+  })
+})

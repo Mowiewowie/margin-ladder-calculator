@@ -21,7 +21,7 @@
 // the primitives remain backward-compatible.
 
 import { toNumber } from './margin.js'
-import { REG_T_INITIAL_MARGIN } from './constants.js'
+import { REG_T_INITIAL_MARGIN, THIN_CUSHION_PCT } from './constants.js'
 
 /**
  * How far a price can fall before reaching `callPrice`, as a fraction of price
@@ -254,8 +254,21 @@ export function computeAccount(account, opts = {}) {
     }
   })
 
+  // Account-wide ladder status: scan every stock's ladder rows. 'call' if any
+  // rung would trigger a margin call, else 'thin' if any cushion is thin, else
+  // 'clear'. Mirrors the per-row red/amber colouring in the ladder table.
+  let anyCalled = false
+  let anyThin = false
+  for (const pv of positionViews) {
+    for (const row of pv.ladderRows) {
+      if (row.called) anyCalled = true
+      else if (row.cushionPct < THIN_CUSHION_PCT) anyThin = true
+    }
+  }
+  const ladderAlert = anyCalled ? 'call' : anyThin ? 'thin' : 'clear'
+
   return {
-    summary: { ...snap, totalInvested, unrealizedPL, existingLoan, plannedBuyCost },
+    summary: { ...snap, totalInvested, unrealizedPL, existingLoan, plannedBuyCost, ladderAlert },
     positions: positionViews,
   }
 }

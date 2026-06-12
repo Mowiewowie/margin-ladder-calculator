@@ -36,7 +36,7 @@ export function useAccountModel() {
   )
 
   const tickers = account.positions.map((p) => p.ticker).filter(Boolean)
-  const { quotes, lastUpdated, loading, refresh } = usePrices(tickers)
+  const { quotes, lastUpdated, loading, refresh, marketOpen } = usePrices(tickers)
 
   // Resolve each position's effective price + a status for the UI.
   const resolved = useMemo(() => {
@@ -118,7 +118,7 @@ export function useAccountModel() {
   return {
     account,
     model,
-    prices: { quotes, lastUpdated, loading, refresh },
+    prices: { quotes, lastUpdated, loading, refresh, marketOpen },
     setLoan,
     addPosition,
     removePosition,

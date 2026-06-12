@@ -43,3 +43,41 @@ describe('usePrices — debounced ticker fetching', () => {
     expect(provider).not.toHaveBeenCalled()
   })
 })
+
+describe('usePrices — market-hours polling', () => {
+  it('after hours: fetches once on load but does NOT poll on the interval', async () => {
+    vi.useFakeTimers()
+    const provider = vi.fn(async (t) => ({ ticker: t, price: 100 }))
+    renderHook(() =>
+      usePrices(['AAPL'], { provider, debounceMs: 0, intervalMs: 1000, isMarketOpen: () => false })
+    )
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0)
+    })
+    expect(provider).toHaveBeenCalledTimes(1) // initial load only
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000) // several intervals elapse
+    })
+    expect(provider).toHaveBeenCalledTimes(1) // still 1 — no after-hours polling
+  })
+
+  it('during market hours: polls on the interval', async () => {
+    vi.useFakeTimers()
+    const provider = vi.fn(async (t) => ({ ticker: t, price: 100 }))
+    renderHook(() =>
+      usePrices(['AAPL'], { provider, debounceMs: 0, intervalMs: 1000, isMarketOpen: () => true })
+    )
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0)
+    })
+    expect(provider).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000)
+    })
+    expect(provider).toHaveBeenCalledTimes(2)
+  })
+})
