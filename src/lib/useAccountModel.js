@@ -1,15 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { computeAccount } from './account.js'
 import { usePrices } from './usePrices.js'
+import { useLocalStorageState } from './useLocalStorage.js'
 import { toNumber } from './margin.js'
 import { incrementRungPrices, nextRungPrice } from './ladder.js'
 import {
+  ACCOUNT_STORAGE_KEY,
   DEFAULT_ACCOUNT,
   DEFAULT_LADDER_STEP_PCT,
   REG_T_INITIAL_MARGIN,
   makePosition,
   makeRung,
 } from './constants.js'
+
+/** Minimal shape check for a restored account from localStorage. */
+function isValidAccount(a) {
+  return a && typeof a === 'object' && Array.isArray(a.positions)
+}
 
 /**
  * Single state + recompute hook for the whole multi-stock account.
@@ -20,7 +27,13 @@ import {
  * Components stay presentational.
  */
 export function useAccountModel() {
-  const [account, setAccount] = useState(DEFAULT_ACCOUNT)
+  // Persist the user's entries; restore them on load (defaults only when blank).
+  // Live prices are NOT stored — they're re-fetched and recomputed on load.
+  const [account, setAccount] = useLocalStorageState(
+    ACCOUNT_STORAGE_KEY,
+    DEFAULT_ACCOUNT,
+    isValidAccount
+  )
 
   const tickers = account.positions.map((p) => p.ticker).filter(Boolean)
   const { quotes, lastUpdated, loading, refresh } = usePrices(tickers)

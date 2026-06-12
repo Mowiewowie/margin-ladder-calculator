@@ -27,6 +27,9 @@ export const PRICE_DATA_SOURCE = 'Finnhub'
 // feels instant once you stop typing.
 export const PRICE_DEBOUNCE_MS = 300
 
+// localStorage key for the saved account (bump the version if the shape changes).
+export const ACCOUNT_STORAGE_KEY = 'margin-ladder-calculator:account:v1'
+
 let seq = 0
 const uid = (prefix) => `${prefix}${Date.now().toString(36)}${(seq++).toString(36)}`
 
