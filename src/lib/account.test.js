@@ -121,15 +121,71 @@ describe('computePositionLadder — single position matches original worked exam
     const r = rows[0]
     expect(r.cumulativeShares).toBe(1500)
     expect(r.cumulativeLoan).toBe(45000)
-    // Conservative valuation: current 1000@$100 + 500@$90 = $145k MV, equity
-    // $100k -> 100000/145000 ≈ 68.97% (current shares stay at current price).
-    expect(r.equityPct).toBeCloseTo(0.6897, 4)
+    // "As the dip happens": the WHOLE 1500 shares are valued at the $90 rung
+    // price -> MV $135k, equity $90k -> 66.7%.
+    expect(r.equityPct).toBeCloseTo(0.6667, 4)
     expect(r.callPrice).toBeCloseTo(42.857, 3) // 45000 / (1500 * 0.70)
     expect(r.called).toBe(false)
   })
 })
 
-describe('computePositionLadder — conservative buying spends excess equity', () => {
+describe('computePositionLadder — a falling price calls the deep, over-leveraged rungs', () => {
+  // High 76% maintenance + buying the dip: early rungs are fine, but the deepest
+  // rung is a margin call because the drop erodes the existing shares too.
+  const rows = computePositionLadder({
+    position: {
+      shares: 21000,
+      avgCost: 14.95,
+      eprPct: 76,
+      price: 16.58,
+      rungs: [
+        { id: 'a', price: 15.4, shares: 1000 },
+        { id: 'b', price: 14.6, shares: 2500 },
+        { id: 'c', price: 13.8, shares: 2500 },
+        { id: 'd', price: 13.12, shares: 1500 },
+      ],
+    },
+    others: [],
+    loan: 0,
+  })
+
+  it('keeps early rungs safe but flags the deepest rung as a margin call', () => {
+    expect(rows[0].called).toBe(false) // $15.40
+    expect(rows[1].called).toBe(false) // $14.60
+    expect(rows[rows.length - 1].called).toBe(true) // $13.12
+  })
+
+  it('revalues the whole position at each rung price (existing shares drop too)', () => {
+    // Row 1 @ $15.40: equity% = (22000*15.40 - 15400) / (22000*15.40).
+    expect(rows[0].equityPct).toBeCloseTo((22000 * 15.4 - 15400) / (22000 * 15.4), 4)
+  })
+})
+
+describe('computePositionLadder — cost basis and current price do NOT enter the call math', () => {
+  const base = {
+    position: { shares: 1000, avgCost: 50, eprPct: 30, price: 100, rungs: [{ id: 'r1', price: 90, shares: 500 }] },
+    others: [],
+    loan: 0,
+  }
+
+  it('changing the average cost basis leaves call price / called / equity% identical', () => {
+    const a = computePositionLadder(base)[0]
+    const b = computePositionLadder({ ...base, position: { ...base.position, avgCost: 14.95 } })[0]
+    expect(b.callPrice).toBeCloseTo(a.callPrice, 10)
+    expect(b.equityPct).toBeCloseTo(a.equityPct, 10)
+    expect(b.called).toBe(a.called)
+  })
+
+  it('the call price depends only on loan, shares and maintenance (not the current price)', () => {
+    const hi = computePositionLadder({ ...base, position: { ...base.position, price: 500 } })[0]
+    const lo = computePositionLadder({ ...base, position: { ...base.position, price: 12 } })[0]
+    // 45000 / (1500 * 0.70) regardless of the current price input.
+    expect(hi.callPrice).toBeCloseTo(42.857, 3)
+    expect(lo.callPrice).toBeCloseTo(42.857, 3)
+  })
+})
+
+describe('computePositionLadder — buying on margin spends excess equity until a call', () => {
   // No collateral elsewhere; every margin buy erodes excess equity until a call.
   const rows = computePositionLadder({
     position: { shares: 1000, avgCost: 100, eprPct: 30, price: 100, rungs: [

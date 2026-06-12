@@ -137,20 +137,26 @@ export function maxSharesBeforeCallAccount(positions, loan, index, atPrice, opts
 }
 
 /**
- * Simulate building out one position's ladder, rung by rung, on top of the rest
- * of the account (other positions counted as their full planned legs). Loan and
- * shares accumulate; each margin buy is valued conservatively at its buy price.
+ * Simulate buying down one position's ladder "as the dip happens".
+ *
+ * Each row represents the stock having FALLEN to that rung's price and you
+ * having bought every rung down to there. Crucially, the focus stock's ENTIRE
+ * holding (existing shares + everything laddered in so far) is revalued at the
+ * rung price — a real dip drops your existing shares too — while other stocks
+ * are held at their current price as collateral. The loan is the actual dollars
+ * borrowed (buys happen at their buy price). This is why an over-leveraged deep
+ * rung correctly shows a margin call: as the price falls, your existing equity
+ * erodes and the rising loan tips you under the maintenance requirement.
  *
  * @param {object} args
  *   position : focus position { shares, avgCost, eprPct, price, rungs }
- *   others   : the other raw positions (their full plans act as collateral)
+ *   others   : the other raw positions (their plans act as collateral at current price)
  *   loan     : the account's existing (pre-ladder) loan balance
  * @returns {Array} cumulative rows evaluated at the account level.
  */
 export function computePositionLadder({ position, others = [], loan = 0, opts = {} }) {
   const m = toNumber(position.eprPct) / 100
   const currentShares = toNumber(position.shares)
-  const currentPrice = toNumber(position.price)
 
   const otherLegs = others.map(positionLeg).map((l) => ({ mv: l.mv, m: l.m, rungCost: l.rungCost }))
   const otherCollateral = otherLegs.reduce((a, l) => a + l.mv * (1 - l.m), 0)
@@ -159,8 +165,7 @@ export function computePositionLadder({ position, others = [], loan = 0, opts = 
 
   const ordered = [...(position.rungs ?? [])].sort((a, b) => toNumber(b.price) - toNumber(a.price))
 
-  let focusMv = currentShares * currentPrice
-  let focusShares = currentShares
+  let shares = currentShares
   let curLoan = baseLoan
 
   return ordered.map((rung) => {
@@ -168,22 +173,23 @@ export function computePositionLadder({ position, others = [], loan = 0, opts = 
     const buyShares = toNumber(rung.shares)
     const cost = buyShares * price
 
-    // Max shares before a call, from the PRE-buy state at this rung's price.
-    const preLegs = [...otherLegs, { mv: focusMv, m }]
+    // Max additional shares before a call, from the PRE-buy state with the focus
+    // holding revalued at this rung's price.
+    const preLegs = [...otherLegs, { mv: shares * price, m }]
     const pre = snapshotLegs(preLegs, curLoan, opts)
     const maxShares = m > 0 && price > 0 ? Math.max(0, pre.excessEquity / (price * m)) : m <= 0 ? Infinity : 0
 
-    // Apply the conservative margin buy.
-    focusMv += cost
-    focusShares += buyShares
+    // Apply the buy; the whole focus position is now valued at the rung price.
+    shares += buyShares
     curLoan += cost
+    const focusMv = shares * price
 
     const snap = snapshotLegs([...otherLegs, { mv: focusMv, m }], curLoan, opts)
 
-    // Focus call price: uniform price all focus shares would fall to for a call.
+    // Price all focus shares would fall to for a call (account-aware).
     let callPrice
-    const denom = focusShares * (1 - m)
-    if (focusShares <= 0) callPrice = 0
+    const denom = shares * (1 - m)
+    if (shares <= 0) callPrice = 0
     else if (denom <= 0) callPrice = Infinity
     else {
       const pp = (curLoan - otherCollateral) / denom
@@ -196,13 +202,14 @@ export function computePositionLadder({ position, others = [], loan = 0, opts = 
       buyShares,
       buyCost: cost,
       maxSharesBeforeCall: maxShares,
-      cumulativeShares: focusShares,
+      cumulativeShares: shares,
       cumulativeLoan: curLoan,
       equityPct: snap.equityPct,
       excessEquity: snap.excessEquity,
       callPrice,
       called: snap.called,
-      cushionPct: cushionFraction(currentPrice, callPrice),
+      // Cushion from this rung's (dip) price down to the call price.
+      cushionPct: cushionFraction(price, callPrice),
     }
   })
 }
